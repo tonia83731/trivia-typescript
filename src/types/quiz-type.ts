@@ -1,4 +1,4 @@
-export interface QuizParmas {
+export interface QuizParams {
   amount: number
   category: string
   difficulty: QuizDifficulty
@@ -11,6 +11,19 @@ export interface QuizCategoryRes {
 export interface QuizCategory {
   id:number
   name:string
+}
+
+export interface QuizRes {
+  results: QuizItem[]
+}
+
+export interface QuizItem {
+  category: string,
+  correct_answer: string,
+  difficulty: string,
+  incorrect_answers: string[],
+  question: string,
+  type: string
 }
 
 export enum QuizDifficulty {

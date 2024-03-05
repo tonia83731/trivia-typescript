@@ -7,12 +7,13 @@ import SetQuizType from "./components/SetQuizType";
 import PlayQuiz from "./components/PlayQuiz";
 import Result from "./components/Result";
 
-import { getCategories } from "./api/getTriviaData";
+import { getCategories, getQuiz } from "./api/getTriviaData";
 import {
-  QuizParmas,
+  QuizParams,
   QuizDifficulty,
   QuizType,
   QuizCategory,
+  QuizItem,
 } from "./types/quiz-type";
 
 enum QuizSteps {
@@ -26,15 +27,14 @@ enum QuizSteps {
 
 export default function App() {
   const [status, setStatus] = useState<QuizSteps>(QuizSteps.setQty);
-  const [params, setParams] = useState<QuizParmas>({
+  const [params, setParams] = useState<QuizParams>({
     amount: 10,
     category: "",
     difficulty: QuizDifficulty.Mix,
     type: QuizType.Mix,
   });
   const [categories, setCategories] = useState<QuizCategory[]>([]);
-
-  console.log(params);
+  const [quiz, setQuiz] = useState<QuizItem[]>([]);
 
   useEffect(() => {
     const getCategoriesAsync = async () => {
@@ -48,6 +48,7 @@ export default function App() {
       }
     };
     getCategoriesAsync();
+    // getQuizAsync();
   }, []);
 
   const renderScreenByStatus = () => {
@@ -84,7 +85,6 @@ export default function App() {
           <SetQuizDifficulty
             value={params.difficulty}
             onDiffChange={(diff) => {
-              console.log(diff);
               setParams({ ...params, difficulty: diff });
             }}
             onPrevClick={() => setStatus(QuizSteps.setCategory)}
@@ -96,15 +96,25 @@ export default function App() {
           <SetQuizType
             value={params.type}
             onTypeChange={(type) => {
-              console.log(type);
               setParams({ ...params, type: type });
             }}
             onPrevClick={() => setStatus(QuizSteps.setCategory)}
-            onNextClick={() => setStatus(QuizSteps.setType)}
+            onNextClick={async () => {
+              const quizData = await getQuiz(params);
+              if (quizData.length > 0) {
+                setQuiz(quizData);
+                setStatus(QuizSteps.Play);
+              } else {
+                alert(
+                  `Couldn't find ${params.amount} question for category: ${params.category}`
+                );
+                setStatus(QuizSteps.setQty);
+              }
+            }}
           />
         );
       case QuizSteps.Play:
-        return <PlayQuiz />;
+        return <PlayQuiz quiz={quiz} quizQty={params.amount} />;
       case QuizSteps.Result:
         return <Result />;
       default:
