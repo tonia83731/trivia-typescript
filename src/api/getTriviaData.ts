@@ -1,9 +1,10 @@
 import axios from "axios"
+import { QuizCategoryRes } from '../types/quiz-type';
 const BASE_URL = 'https://opentdb.com'
 export const getCategories = async () => {
     try {
-        const response = await axios.get(`${BASE_URL}/api_category.php`)
-        console.log(response)
+        const {data} = await axios.get<QuizCategoryRes>(`${BASE_URL}/api_category.php`)
+        return data.trivia_categories
     } catch (error) {
         console.log('[Get categories failed]:', error)
     }

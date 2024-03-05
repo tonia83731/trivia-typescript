@@ -42,3 +42,7 @@ button:focus,
 button:focus-visible {
   outline: none;
 }
+
+input, label {
+  cursor: pointer;
+}

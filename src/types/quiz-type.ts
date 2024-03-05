@@ -5,6 +5,14 @@ export interface QuizParmas {
   type: QuizType
 }
 
+export interface QuizCategoryRes {
+  trivia_categories: QuizCategory[]
+}
+export interface QuizCategory {
+  id:number
+  name:string
+}
+
 export enum QuizDifficulty {
   Mix = "",
   Easy = "easy",

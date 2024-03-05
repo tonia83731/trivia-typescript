@@ -19,7 +19,7 @@ export default function SetQuizQty(props: Qty_props) {
   return (
     <section className="mt-10 text-center">
       <h3 className="text-2xl text-blue-950">How many numbers of quiz?</h3>
-      <div className="h-[400px] w-3/5 mx-auto flex flex-col justify-center items-center">
+      <div className="min-h-[250px] w-3/5 mx-auto flex flex-col justify-center items-center">
         <div className="mb-6">
           Quiz Numbers: <span className="">{defaultValue}</span>
         </div>
@@ -45,7 +45,7 @@ export default function SetQuizQty(props: Qty_props) {
           onChange={onQtyChange}
         />
       </div>
-      <div className="flext justify-between items-center">
+      <div className="mt-6 flext justify-between items-center">
         <button
           className="bg-amber-300 text-blue-950 text-lg hover:font-bold hover:shadow-md"
           onClick={onNextClick}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SetQuizLayout from "./components/SetQuizLayout";
 import SetQuizQty from "./components/SetQuizQty";
 import SetQuizCategory from "./components/SetQuizCategory";
@@ -7,7 +7,13 @@ import SetQuizType from "./components/SetQuizType";
 import PlayQuiz from "./components/PlayQuiz";
 import Result from "./components/Result";
 
-import { QuizParmas, QuizDifficulty, QuizType } from "./types/quiz-type";
+import { getCategories } from "./api/getTriviaData";
+import {
+  QuizParmas,
+  QuizDifficulty,
+  QuizType,
+  QuizCategory,
+} from "./types/quiz-type";
 
 enum QuizSteps {
   setQty,
@@ -26,8 +32,23 @@ export default function App() {
     difficulty: QuizDifficulty.Mix,
     type: QuizType.Mix,
   });
+  const [categories, setCategories] = useState<QuizCategory[]>([]);
 
   console.log(params);
+
+  useEffect(() => {
+    const getCategoriesAsync = async () => {
+      try {
+        const data = await getCategories();
+        if (Array.isArray(data)) {
+          setCategories([{ id: -1, name: "Mixed" }, ...data]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getCategoriesAsync();
+  }, []);
 
   const renderScreenByStatus = () => {
     switch (status) {
@@ -46,11 +67,42 @@ export default function App() {
           />
         );
       case QuizSteps.setCategory:
-        return <SetQuizCategory />;
+        return (
+          <SetQuizCategory
+            categories={categories}
+            value={params.category}
+            onCateChange={(event) => {
+              const value = event.target.value;
+              setParams({ ...params, category: value });
+            }}
+            onPrevClick={() => setStatus(QuizSteps.setQty)}
+            onNextClick={() => setStatus(QuizSteps.setDifficulty)}
+          />
+        );
       case QuizSteps.setDifficulty:
-        return <SetQuizDifficulty />;
+        return (
+          <SetQuizDifficulty
+            value={params.difficulty}
+            onDiffChange={(diff) => {
+              console.log(diff);
+              setParams({ ...params, difficulty: diff });
+            }}
+            onPrevClick={() => setStatus(QuizSteps.setCategory)}
+            onNextClick={() => setStatus(QuizSteps.setType)}
+          />
+        );
       case QuizSteps.setType:
-        return <SetQuizType />;
+        return (
+          <SetQuizType
+            value={params.type}
+            onTypeChange={(type) => {
+              console.log(type);
+              setParams({ ...params, type: type });
+            }}
+            onPrevClick={() => setStatus(QuizSteps.setCategory)}
+            onNextClick={() => setStatus(QuizSteps.setType)}
+          />
+        );
       case QuizSteps.Play:
         return <PlayQuiz />;
       case QuizSteps.Result:
