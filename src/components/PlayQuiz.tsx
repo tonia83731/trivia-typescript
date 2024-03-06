@@ -17,17 +17,42 @@ const makeAnswerRandom = (quiz: QuizItem[], index: number): string[] => {
 
 export default function PlayQuiz(props: Play_props) {
   const { quiz, quizQty } = props;
+
   const [quizIndex, setQuizIndex] = useState<number>(0);
+  const currentQuizItem = quiz[quizIndex];
   const [availableAns, setAvailableAns] = useState<string[]>([]);
   const [selectAns, setSelectAns] = useState<string>("");
-
-  console.log(quiz);
+  const [quizStatus, setQuizStatus] = useState<
+    "valid" | "invalid" | "unanswered"
+  >("unanswered");
+  // const initialHistory = Array.from({ length: quizQty }, () => "");
+  const [history, setHistory] = useState<(string | boolean)[]>([]);
 
   const handleEnterClick = () => {
     if (quizIndex < quizQty - 1) {
       setQuizIndex(quizIndex + 1);
+      setQuizStatus("unanswered");
     }
   };
+
+  const isValidAns = (selectAns: string): boolean => {
+    return selectAns === currentQuizItem.correct_answer;
+  };
+
+  const renderAnsBar = quiz.map((_, index) => {
+    return (
+      <span
+        className={`w-5 h-2 rounded-sm ${
+          index >= quizIndex
+            ? "bg-slate-200"
+            : history[index] === true
+            ? "bg-green-600"
+            : "bg-rose-600"
+        }`}
+        key={`status-${index}`}
+      ></span>
+    );
+  });
 
   const renderAns = availableAns.map((ans, index) => {
     return (
@@ -35,12 +60,25 @@ export default function PlayQuiz(props: Play_props) {
         <input
           type="radio"
           id={`ans-${index}`}
+          key={`ans-${index}`}
           name={`quiz-${quizIndex}`}
-          value=""
+          // defaultValue=""
+          value={ans}
           className="mr-2"
           onChange={() => setSelectAns(ans)}
+          // checked={selectAns === ans}
         />
-        <label htmlFor="">{ans}</label>
+        <label
+          htmlFor={`ans-${index}`}
+          className={`${
+            quizStatus === "unanswered"
+              ? ""
+              : isValidAns(ans)
+              ? "text-green-600"
+              : "text-rose-600"
+          } ${selectAns === ans ? "font-bold" : ""}`}
+          dangerouslySetInnerHTML={{ __html: ans }}
+        ></label>
       </div>
     );
   });
@@ -49,13 +87,32 @@ export default function PlayQuiz(props: Play_props) {
     setAvailableAns(makeAnswerRandom(quiz, quizIndex));
   }, [quizIndex]);
 
+  useEffect(() => {
+    if (selectAns) {
+      const isValid = isValidAns(selectAns);
+      if (isValid) {
+        setQuizStatus("valid");
+      } else {
+        setQuizStatus("invalid");
+      }
+      // history[quizIndex] = isValid;
+      setHistory([...history, isValid]);
+    }
+  }, [selectAns]);
+
   return (
     <section className="mt-10 text-center">
-      <h3 className="text-2xl text-blue-950">{quiz[quizIndex].question}</h3>
-      <div className="min-h-[250px] w-4/5 mx-auto text-sm flex justify-center items-center">
+      <h3
+        className="text-2xl text-blue-950"
+        dangerouslySetInnerHTML={{ __html: currentQuizItem.question }}
+      ></h3>
+      <div className="min-h-[250px] w-4/5 mx-auto text-sm flex flex-col justify-center items-center">
+        <div className="gap-2 flex justify-center items-center mb-6">
+          {renderAnsBar}
+        </div>
         <div
-          className={`grid gap-4 grid-rows-2 ${
-            quiz[quizIndex].type === "multiple" ? "grid-cols-2" : "grid-cols-1"
+          className={`grid gap-4 grid-rows-2 text-start ${
+            currentQuizItem.type === "multiple" ? "grid-cols-2" : "grid-cols-1"
           }`}
         >
           {renderAns}
