@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 type Play_props = {
   quiz: QuizItem[];
   quizQty: number;
+  onSubmitClick: (history: boolean[]) => void;
   // onEnterClick: () => void
 };
 
@@ -16,7 +17,7 @@ const makeAnswerRandom = (quiz: QuizItem[], index: number): string[] => {
 };
 
 export default function PlayQuiz(props: Play_props) {
-  const { quiz, quizQty } = props;
+  const { quiz, quizQty, onSubmitClick } = props;
 
   const [quizIndex, setQuizIndex] = useState<number>(0);
   const currentQuizItem = quiz[quizIndex];
@@ -26,12 +27,13 @@ export default function PlayQuiz(props: Play_props) {
     "valid" | "invalid" | "unanswered"
   >("unanswered");
   // const initialHistory = Array.from({ length: quizQty }, () => "");
-  const [history, setHistory] = useState<(string | boolean)[]>([]);
+  const [history, setHistory] = useState<boolean[]>([]);
 
   const handleEnterClick = () => {
     if (quizIndex < quizQty - 1) {
       setQuizIndex(quizIndex + 1);
       setQuizStatus("unanswered");
+      setSelectAns("");
     }
   };
 
@@ -62,11 +64,10 @@ export default function PlayQuiz(props: Play_props) {
           id={`ans-${index}`}
           key={`ans-${index}`}
           name={`quiz-${quizIndex}`}
-          // defaultValue=""
           value={ans}
           className="mr-2"
+          checked={ans === selectAns}
           onChange={() => setSelectAns(ans)}
-          // checked={selectAns === ans}
         />
         <label
           htmlFor={`ans-${index}`}
@@ -119,12 +120,23 @@ export default function PlayQuiz(props: Play_props) {
         </div>
       </div>
       <div className="mt-6 flext justify-between items-center">
-        <button
-          className="bg-amber-300 text-blue-950 text-lg hover:font-bold hover:shadow-md"
-          onClick={handleEnterClick}
-        >
-          Enter <FontAwesomeIcon icon={faAngleRight} />
-        </button>
+        {quizIndex !== quizQty - 1 ? (
+          <button
+            className="bg-amber-300 text-blue-950 text-lg enabled:hover:font-bold enabled:hover:shadow-md disabled:bg-slate-300 disabled:text-white"
+            onClick={handleEnterClick}
+            disabled={selectAns === ""}
+          >
+            Next <FontAwesomeIcon icon={faAngleRight} />
+          </button>
+        ) : (
+          <button
+            className="bg-amber-300 text-blue-950 text-lg enabled:hover:font-bold enabled:hover:shadow-md disabled:bg-slate-300 disabled:text-white"
+            onClick={() => onSubmitClick(history)}
+            disabled={selectAns === ""}
+          >
+            Submit
+          </button>
+        )}
       </div>
     </section>
   );

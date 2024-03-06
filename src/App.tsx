@@ -35,6 +35,18 @@ export default function App() {
   });
   const [categories, setCategories] = useState<QuizCategory[]>([]);
   const [quiz, setQuiz] = useState<QuizItem[]>([]);
+  const [results, setResults] = useState<boolean[]>([]);
+  const initializedData = () => {
+    setParams({
+      amount: 10,
+      category: "",
+      difficulty: QuizDifficulty.Mix,
+      type: QuizType.Mix,
+    });
+    setCategories([]);
+    setQuiz([]);
+    setResults([]);
+  };
 
   useEffect(() => {
     const getCategoriesAsync = async () => {
@@ -114,9 +126,27 @@ export default function App() {
           />
         );
       case QuizSteps.Play:
-        return <PlayQuiz quiz={quiz} quizQty={params.amount} />;
+        return (
+          <PlayQuiz
+            quiz={quiz}
+            quizQty={params.amount}
+            onSubmitClick={(history) => {
+              setResults(history);
+              setStatus(QuizSteps.Result);
+            }}
+          />
+        );
       case QuizSteps.Result:
-        return <Result />;
+        return (
+          <Result
+            results={results}
+            quizQty={params.amount}
+            onRestartClick={() => {
+              setStatus(QuizSteps.setQty);
+              initializedData();
+            }}
+          />
+        );
       default:
         return <></>;
     }
